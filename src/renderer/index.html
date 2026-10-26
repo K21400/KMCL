@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;" />
+    <title>KMCL 我的世界启动器</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app-bg"></div>
+    <header class="titlebar" id="titlebar">
+      <div class="titlebar-drag">
+        <span class="titlebar-dot"></span>
+        <span class="titlebar-name">KMCL</span>
+        <span class="titlebar-sub">我的世界启动器</span>
+      </div>
+      <div class="titlebar-actions">
+        <button class="winbtn" id="win-min" title="最小化">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8" /></svg>
+        </button>
+        <button class="winbtn" id="win-max" title="最大化">
+          <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" rx="1.2" /></svg>
+        </button>
+        <button class="winbtn winbtn-close" id="win-close" title="关闭">
+          <svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6" /></svg>
+        </button>
+      </div>
+    </header>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">K</div>
+          <div class="brand-text">KMCL<span>我的世界启动器</span></div>
+        </div>
+        <nav class="nav">
+          <button class="nav-btn active" data-page="home">启动</button>
+          <button class="nav-btn" data-page="download">下载</button>
+          <button class="nav-btn" data-page="versions">版本</button>
+          <button class="nav-btn" data-page="mods">Mods</button>
+          <button class="nav-btn" data-page="settings">设置</button>
+          <button class="nav-btn" data-page="about">关于</button>
+        </nav>
+        <div class="sidebar-foot">
+          <div id="mirror-badge" class="mirror-badge">镜像源</div>
+          <div class="attr">国内镜像资源由 <b>BMCLAPI</b> 提供 · bangbang93</div>
+          <div class="version-tag">v1.0.0</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <!-- 启动页 -->
+        <section class="page active" id="page-home">
+          <header class="page-head">
+            <div>
+              <h1>启动游戏</h1>
+              <p class="muted">选择已安装的版本，一键进入方块世界</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn ghost" id="btn-export-log">导出报错日志</button>
+              <button class="btn ghost" id="btn-open-game">打开游戏目录</button>
+              <button class="btn ghost" id="btn-open-mods">Mods 目录</button>
+            </div>
+          </header>
+
+          <div class="home-grid">
+            <div class="card launch-card">
+              <div class="field">
+                <label>游戏版本</label>
+                <select id="home-version"></select>
+                <div class="hint" id="home-version-meta">尚未安装任何版本</div>
+              </div>
+              <div class="field">
+                <label>账号</label>
+                <div class="account-box">
+                  <div class="account-line">
+                    <b id="account-title">离线账号</b>
+                    <span id="account-sub">未登录正版账号</span>
+                  </div>
+                  <div class="account-actions">
+                    <button class="btn mini primary" id="btn-login-ms">正版登录</button>
+                    <button class="btn mini ghost" id="btn-logout-ms" hidden>退出登录</button>
+                  </div>
+                </div>
+                <div class="chips" id="account-mode">
+                  <button class="chip active" data-mode="offline">离线登录</button>
+                  <button class="chip" data-mode="msa">正版登录</button>
+                </div>
+                <input id="home-username" maxlength="16" placeholder="Steve" />
+                <div class="hint" id="account-hint">离线昵称仅用于本地存档；正版账号可进入正版服务器</div>
+              </div>
+              <div class="memory-summary" id="home-memory"></div>
+              <div class="launch-actions">
+                <button class="btn primary big" id="btn-launch">启动游戏</button>
+                <button class="btn danger ghost" id="btn-kill" hidden>结束游戏</button>
+              </div>
+              <div class="launch-tip">
+                首次启动如缺少文件，启动器会自动补齐；镜像源可在“设置”中切换。
+              </div>
+            </div>
+
+            <div class="card console-card">
+              <div class="card-head">
+                <span>运行日志</span>
+                <button class="btn mini ghost" id="btn-clear-log">清空</button>
+              </div>
+              <pre id="console"></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- 下载页 -->
+        <section class="page" id="page-download">
+          <header class="page-head">
+            <div>
+              <h1>下载中心</h1>
+              <p class="muted">通过国内镜像源快速下载游戏版本，并可同时注入 Forge / Fabric / NeoForge 与 OptiFine</p>
+            </div>
+          </header>
+
+          <div class="tabs" id="dl-tabs">
+            <button class="tab active" data-tab="game">游戏版本</button>
+            <button class="tab" data-tab="forge">Forge</button>
+            <button class="tab" data-tab="fabric">Fabric</button>
+            <button class="tab" data-tab="neoforge">NeoForge</button>
+            <button class="tab" data-tab="optifine">高清修复 OptiFine</button>
+          </div>
+
+          <div class="tab-panel active" id="tab-game">
+            <div class="toolbar">
+              <input id="dl-search" placeholder="搜索版本号，例如 1.20.1" />
+              <div class="chips" id="dl-types">
+                <button class="chip active" data-type="release">正式版</button>
+                <button class="chip" data-type="snapshot">快照</button>
+                <button class="chip" data-type="old">远古版本</button>
+                <button class="chip" data-type="all">全部</button>
+              </div>
+              <button class="btn mini ghost" id="dl-refresh">刷新列表</button>
+            </div>
+            <div class="list" id="dl-list">
+              <div class="empty">正在获取版本列表…</div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-forge">
+            <div class="card loader-card">
+              <div class="loader-info">
+                <h2>安装 Forge</h2>
+                <p class="muted">
+                  Forge 是历史最悠久的模组加载器。请先安装对应的原版版本，再选择 Forge 版本安装。
+                </p>
+              </div>
+              <div class="loader-form">
+                <div class="field">
+                  <label>Minecraft 版本</label>
+                  <select id="forge-mc"></select>
+                  <div class="hint" id="forge-mc-hint">只显示已安装的原版版本</div>
+                </div>
+                <div class="field">
+                  <label>Forge 版本</label>
+                  <select id="forge-ver"></select>
+                  <div class="hint" id="forge-ver-hint">最新版本优先</div>
+                </div>
+                <button class="btn primary" id="btn-install-forge">安装 Forge</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-fabric">
+            <div class="card loader-card">
+              <div class="loader-info">
+                <h2>安装 Fabric</h2>
+                <p class="muted">
+                  Fabric 轻量、更新迅速，适合大多数现代模组。加载器信息经由国内镜像获取，安装全自动。
+                </p>
+              </div>
+              <div class="loader-form">
+                <div class="field">
+                  <label>Minecraft 版本</label>
+                  <select id="fabric-mc"></select>
+                  <div class="hint" id="fabric-mc-hint">只显示已安装的原版版本</div>
+                </div>
+                <div class="field">
+                  <label>Fabric Loader 版本</label>
+                  <select id="fabric-ver"></select>
+                  <div class="hint" id="fabric-ver-hint">稳定版本优先</div>
+                </div>
+                <button class="btn primary" id="btn-install-fabric">安装 Fabric</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-neoforge">
+            <div class="card loader-card">
+              <div class="loader-info">
+                <h2>安装 NeoForge</h2>
+                <p class="muted">
+                  NeoForge 是 1.20.1 之后的新一代 Forge 分支。安装器与依赖库均通过国内镜像下载。
+                </p>
+              </div>
+              <div class="loader-form">
+                <div class="field">
+                  <label>Minecraft 版本</label>
+                  <select id="neoforge-mc"></select>
+                  <div class="hint" id="neoforge-mc-hint">只显示已安装的原版版本</div>
+                </div>
+                <div class="field">
+                  <label>NeoForge 版本</label>
+                  <select id="neoforge-ver"></select>
+                  <div class="hint" id="neoforge-ver-hint">最新版本优先</div>
+                </div>
+                <button class="btn primary" id="btn-install-neoforge">安装 NeoForge</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-optifine">
+            <div class="card loader-card">
+              <div class="loader-info">
+                <h2>安装高清修复 OptiFine</h2>
+                <p class="muted">
+                  OptiFine 提供帧数优化与光影支持。安装包经由国内镜像下载，安装过程全自动，无需手动操作。
+                </p>
+              </div>
+              <div class="loader-form">
+                <div class="field">
+                  <label>Minecraft 版本</label>
+                  <select id="of-mc"></select>
+                  <div class="hint" id="of-mc-hint">只显示已安装的原版版本</div>
+                </div>
+                <div class="field">
+                  <label>OptiFine 版本</label>
+                  <select id="of-ver"></select>
+                  <div class="hint" id="of-ver-hint">按官网列表排序</div>
+                </div>
+                <button class="btn primary" id="btn-install-of">安装 OptiFine</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 版本页 -->
+        <section class="page" id="page-versions">
+          <header class="page-head">
+            <div>
+              <h1>版本管理</h1>
+              <p class="muted">管理已安装的游戏版本与加载器</p>
+            </div>
+            <button class="btn ghost" id="btn-refresh-versions">刷新</button>
+          </header>
+          <div class="list" id="versions-list"></div>
+        </section>
+
+        <!-- Mod 管理 / 下载 / 整合包 -->
+        <section class="page" id="page-mods">
+          <header class="page-head">
+            <div>
+              <h1>模组与整合包</h1>
+              <p class="muted">每个版本拥有独立的 mods 与存档目录，互不影响</p>
+            </div>
+            <div class="head-actions">
+              <select id="mods-version" class="version-pick"></select>
+              <button class="btn ghost" id="btn-mods-refresh">刷新</button>
+              <button class="btn ghost" id="btn-mods-open">打开 mods 目录</button>
+            </div>
+          </header>
+
+          <div class="tabs" id="mods-tabs">
+            <button class="tab active" data-mtab="installed">已安装</button>
+            <button class="tab" data-mtab="browse">下载 Mod</button>
+            <button class="tab" data-mtab="packs">整合包</button>
+          </div>
+
+          <div class="tab-panel active" id="mtab-installed">
+            <div class="card mods-card">
+              <div class="mods-toolbar">
+                <span id="mods-summary" class="muted">正在读取 mods 目录…</span>
+                <input id="mods-search" placeholder="搜索 mod 文件名" />
+              </div>
+              <div class="mods-list" id="mods-list"></div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="mtab-browse">
+            <div class="card">
+              <div class="toolbar mod-toolbar">
+                <input id="mod-search" placeholder="搜索 Mod 名称，例如 JEI" />
+                <select id="mod-source">
+                  <option value="curseforge">CurseForge 国内镜像</option>
+                  <option value="modrinth">Modrinth 国内镜像</option>
+                </select>
+                <select id="mod-loader">
+                  <option value="">全部加载器</option>
+                  <option value="forge">Forge</option>
+                  <option value="fabric">Fabric</option>
+                  <option value="neoforge">NeoForge</option>
+                  <option value="quilt">Quilt</option>
+                </select>
+                <input id="mod-mc" placeholder="游戏版本，如 1.20.1" />
+                <button class="btn mini primary" id="btn-mod-search">搜索</button>
+              </div>
+              <div class="chips" id="mod-cats"></div>
+              <div class="hint" id="mod-browse-hint">可按分类筛选，或直接输入关键字搜索</div>
+              <div class="modcards" id="mod-results"></div>
+              <div class="inline" id="mod-more-wrap" hidden>
+                <button class="btn ghost mini" id="btn-mod-more">加载更多</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="mtab-packs">
+            <div class="card">
+              <div class="toolbar mod-toolbar">
+                <input id="pack-search" placeholder="搜索整合包，例如 天空工厂" />
+                <select id="pack-source">
+                  <option value="curseforge">CurseForge 国内镜像</option>
+                  <option value="modrinth">Modrinth 国内镜像</option>
+                </select>
+                <input id="pack-mc" placeholder="游戏版本（可留空）" />
+                <button class="btn mini primary" id="btn-pack-search">搜索</button>
+                <button class="btn mini ghost" id="btn-pack-import">导入本地整合包</button>
+              </div>
+              <div class="hint" id="pack-hint">支持 CurseForge 整合包（zip）与 Modrinth 整合包（mrpack），导入后自动创建隔离版本</div>
+              <div class="modcards" id="pack-results"></div>
+              <div class="inline" id="pack-more-wrap" hidden>
+                <button class="btn ghost mini" id="btn-pack-more">加载更多</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 设置页 -->
+        <section class="page" id="page-settings">
+          <header class="page-head">
+            <div>
+              <h1>设置</h1>
+              <p class="muted">修改后自动保存</p>
+            </div>
+          </header>
+
+          <div class="settings-grid">
+            <div class="card">
+              <h2>游戏与下载</h2>
+              <div class="field">
+                <label>游戏目录</label>
+                <div class="inline">
+                  <input id="set-gamedir" />
+                  <button class="btn ghost" id="btn-choose-dir">选择</button>
+                </div>
+                <div class="hint">版本、资源与 mods 都会保存在此目录</div>
+              </div>
+
+              <div class="field">
+                <label>下载镜像源</label>
+                <div class="radio-group" id="mirror-group">
+                  <label class="radio"><input type="radio" name="mirror" value="bmclapi" /> BMCLAPI 国内镜像</label>
+                  <label class="radio"><input type="radio" name="mirror" value="official" /> 官方源（Mojang）</label>
+                  <label class="radio"><input type="radio" name="mirror" value="custom" /> 自定义镜像</label>
+                </div>
+                <input id="set-custom-mirror" placeholder="https://bmclapi2.bangbang93.com" />
+                <div class="hint">镜像不可用时会自动回退到官方源；BMCLAPI 资源由 bangbang93 提供</div>
+              </div>
+
+              <div class="field">
+                <label>下载线程数</label>
+                <input id="set-threads" type="number" min="1" max="64" step="1" />
+                <div class="hint">建议 8 - 32，网络较差时降低线程数</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>Java 与内存</h2>
+              <div class="field">
+                <label>Java 运行时</label>
+                <div class="java-list" id="java-list"></div>
+                <div class="inline">
+                  <button class="btn ghost" id="btn-scan-java">重新搜索</button>
+                  <button class="btn ghost" id="btn-add-java">手动添加</button>
+                </div>
+                <div class="hint">启动时会按所选版本自动匹配最合适的 Java，留空自动选择</div>
+              </div>
+
+              <div class="field">
+                <label>内存分配（<span id="mem-label">512 - 4096 MB</span>）</label>
+                <label class="switch-row">
+                  <input type="checkbox" id="set-auto-tune" />
+                  <span>自动调节内存与 GC 参数（按物理内存、Java 版本与 mod 数量）</span>
+                </label>
+                <div class="inline">
+                  <button class="btn ghost mini" id="btn-auto-tune">查看推荐配置</button>
+                  <span class="hint" id="auto-tune-hint">开启后手动内存设置将不再生效</span>
+                </div>
+                <div class="mem-row">
+                  <span class="muted">最小</span>
+                  <input type="range" id="set-mem-min" min="512" max="16384" step="256" />
+                  <span id="set-mem-min-val" class="mem-val">512</span>
+                </div>
+                <div class="mem-row">
+                  <span class="muted">最大</span>
+                  <input type="range" id="set-mem-max" min="512" max="16384" step="256" />
+                  <span id="set-mem-max-val" class="mem-val">4096</span>
+                </div>
+                <div class="hint">单位为 MB，将作为 JVM 参数 -Xms / -Xmx 传给游戏</div>
+              </div>
+
+              <div class="field">
+                <label>额外 JVM 参数</label>
+                <input id="set-jvm-args" placeholder="例如：-XX:+UseG1GC -Dfile.encoding=UTF-8" />
+              </div>
+            </div>
+
+            <div class="card span-2">
+              <h2>启动器外观</h2>
+              <div class="field">
+                <label>界面背景</label>
+                <div class="inline">
+                  <input id="set-bg-path" readonly placeholder="默认：我的世界风景图" />
+                  <button class="btn ghost" id="btn-choose-bg">选择图片</button>
+                  <button class="btn ghost" id="btn-reset-bg">恢复默认</button>
+                </div>
+                <div class="hint">支持 PNG / JPG / WebP / GIF，建议使用 16:9 横向图片</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 关于页 -->
+        <section class="page" id="page-about">
+          <header class="page-head">
+            <div>
+              <h1>关于</h1>
+              <p class="muted">作者信息与可扩展的内容位</p>
+            </div>
+          </header>
+
+          <div class="about-grid">
+            <div class="card author-card">
+              <div class="author-avatar">K</div>
+              <div class="author-main">
+                <h2 class="author-name">K21400</h2>
+                <p class="muted author-role">KMCL 我的世界启动器的作者 / 维护者</p>
+                <div class="author-tags">
+                  <span class="tag">Electron</span>
+                  <span class="tag">Minecraft</span>
+                  <span class="tag">国内镜像加速</span>
+                </div>
+                <p class="author-desc">
+                  感谢使用 KMCL。启动器围绕国内网络环境做了镜像加速与整合包自动适配，
+                  并持续补充中文社区名称、前置模组与运行参数自动调节等能力。
+                </p>
+              </div>
+            </div>
+
+            <!-- 预留扩展位：作者可在此继续追加卡片，无需改动其它页面 -->
+            <div class="card" id="about-slots">
+              <h2>扩展内容</h2>
+              <div class="hint">这里是预留的内容位，后续可以在此添加更新日志、联系方式、赞助信息等。</div>
+              <div class="slot-list" id="about-extra"></div>
+            </div>
+
+            <div class="card span-2">
+              <h2>项目信息</h2>
+              <div class="info-grid">
+                <div class="info-item"><span>启动器版本</span><b>v1.0.0</b></div>
+                <div class="info-item"><span>技术栈</span><b>Electron 31 · 原生 HTML/CSS/JS</b></div>
+                <div class="info-item"><span>游戏下载源</span><b>BMCLAPI / Mojang 官方</b></div>
+                <div class="info-item"><span>Mod 下载源</span><b>MCIM 镜像 · CurseForge · Modrinth</b></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-mask hidden" id="install-modal">
+      <div class="modal install-modal">
+        <h2 id="install-title">安装版本</h2>
+        <p class="muted">安装原版的同时，可选择一种模组加载器，并搭配高清修复 OptiFine。</p>
+        <div class="opt-row" id="row-forge">
+          <label class="opt-check">
+            <input type="checkbox" id="chk-forge" data-loader="forge" />
+            <span>同时安装 Forge</span>
+          </label>
+          <select id="install-forge-ver"></select>
+          <div class="hint" id="install-forge-hint">正在检查适配情况…</div>
+        </div>
+        <div class="opt-row" id="row-fabric">
+          <label class="opt-check">
+            <input type="checkbox" id="chk-fabric" data-loader="fabric" />
+            <span>同时安装 Fabric</span>
+          </label>
+          <select id="install-fabric-ver"></select>
+          <div class="hint" id="install-fabric-hint">正在检查适配情况…</div>
+        </div>
+        <div class="opt-row" id="row-neoforge">
+          <label class="opt-check">
+            <input type="checkbox" id="chk-neoforge" data-loader="neoforge" />
+            <span>同时安装 NeoForge</span>
+          </label>
+          <select id="install-neoforge-ver"></select>
+          <div class="hint" id="install-neoforge-hint">正在检查适配情况…</div>
+        </div>
+        <div class="opt-row" id="row-optifine">
+          <label class="opt-check">
+            <input type="checkbox" id="chk-optifine" data-loader="optifine" />
+            <span>同时安装 OptiFine（高清修复）</span>
+          </label>
+          <select id="install-of-ver"></select>
+          <div class="hint" id="install-of-hint">正在检查适配情况…</div>
+        </div>
+        <div class="hint" id="install-combo-hint"></div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="btn-install-cancel">取消</button>
+          <button class="btn primary" id="btn-install-start">开始安装</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-mask hidden" id="login-modal">
+      <div class="modal">
+        <h2>Microsoft 正版登录</h2>
+        <p class="muted">用浏览器打开以下网址，输入下方代码并授权，即可完成登录。</p>
+        <div class="device-code" id="login-code">------</div>
+        <div class="inline">
+          <button class="btn primary" id="btn-open-verify">打开登录页面</button>
+          <button class="btn ghost" id="btn-copy-code">复制代码</button>
+        </div>
+        <div class="hint" id="login-status">正在申请登录代码…</div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="btn-cancel-login">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="task-panel hidden" id="task-panel">
+      <div class="task-head">
+        <span id="task-title">任务</span>
+        <div class="inline">
+          <button class="btn mini ghost" id="task-detail">详情</button>
+          <button class="btn mini ghost" id="task-cancel">取消</button>
+        </div>
+      </div>
+      <div class="task-phase" id="task-phase">准备中…</div>
+      <div class="progress"><div class="progress-bar" id="task-bar"></div></div>
+      <div class="task-stats" id="task-stats"></div>
+    </div>
+
+    <div class="modal-mask hidden" id="progress-modal">
+      <div class="modal wide">
+        <h2 id="progress-title">任务详情</h2>
+        <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="detail-grid" id="progress-grid"></div>
+        <div class="detail-phases" id="progress-phases"></div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="btn-progress-close">关闭</button>
+          <button class="btn primary" id="btn-progress-cancel">取消任务</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-mask hidden" id="mod-detail-modal">
+      <div class="modal wide detail-modal">
+        <div class="md-head">
+          <div class="md-icon-wrap">
+            <img class="md-icon" id="md-icon" alt="" />
+          </div>
+          <div class="md-head-text">
+            <h2 id="md-name">Mod 详情</h2>
+            <div class="md-name-alt" id="md-name-alt"></div>
+            <div class="md-meta" id="md-meta">正在读取详情…</div>
+            <div class="md-tags" id="md-tags"></div>
+          </div>
+        </div>
+        <div class="md-summary" id="md-summary">正在从国内镜像获取简介…</div>
+        <div class="md-links">
+          <button class="btn mini ghost" id="btn-md-mcmod">MC 百科</button>
+          <button class="btn mini ghost" id="btn-md-website" hidden>项目主页</button>
+          <button class="btn mini ghost" id="btn-md-wiki" hidden>Wiki</button>
+        </div>
+        <div class="field md-file-field">
+          <label id="md-file-label">选择文件版本</label>
+          <select id="md-files" size="9" class="select-list"></select>
+          <div class="hint" id="md-file-hint"></div>
+        </div>
+        <div class="hint" id="md-target-hint"></div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="btn-md-cancel">取消</button>
+          <button class="btn primary" id="btn-md-install">下载并安装</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-mask hidden" id="dep-modal">
+      <div class="modal wide">
+        <h2>该 Mod 需要前置</h2>
+        <p class="muted" id="dep-sub">检测到以下必需前置 Mod，可一并安装以避免启动崩溃。</p>
+        <div class="dep-list" id="dep-list"></div>
+        <div class="hint" id="dep-hint"></div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="btn-dep-cancel">取消</button>
+          <button class="btn ghost" id="btn-dep-skip">仅安装本体</button>
+          <button class="btn primary" id="btn-dep-install">同时安装前置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-mask hidden" id="pack-import-modal">
+      <div class="modal wide">
+        <h2>导入本地整合包</h2>
+        <p class="muted" id="pack-import-file">已识别整合包压缩包</p>
+        <div class="pack-import-grid">
+          <div class="field">
+            <label>游戏版本</label>
+            <select id="pack-import-mc"></select>
+          </div>
+          <div class="field">
+            <label>模组加载器</label>
+            <select id="pack-import-loader">
+              <option value="">原版（不安装加载器）</option>
+              <option value="forge">Forge（自动选最新）</option>
+              <option value="fabric">Fabric（自动选最新）</option>
+              <option value="neoforge">NeoForge（自动选最新）</option>
+            </select>
+          </div>
+        </div>
+        <div class="hint" id="pack-import-hint"></div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="btn-pack-cancel">取消</button>
+          <button class="btn primary" id="btn-pack-confirm">开始安装</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="drop-overlay hidden" id="drop-overlay">
+      <div class="drop-card">
+        <div class="drop-icon">＋</div>
+        <div class="drop-title">松开以导入整合包</div>
+        <div class="drop-sub">支持 CurseForge / Modrinth / HMCL / PCL 导出的 .zip、.mrpack</div>
+      </div>
+    </div>
+
+    <div class="toasts" id="toasts"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

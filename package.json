@@ -1,0 +1,62 @@
+{
+  "name": "kmcl-launcher",
+  "version": "1.0.0",
+  "description": "KMCL - 我的世界启动器",
+  "main": "src/main/index.js",
+  "author": "KMCL",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "dist": "set ELECTRON_BUILDER_CACHE=%cd%\\.eb-cache&& set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/&& set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/&& electron-builder --win portable --x64",
+    "dist:portable": "set ELECTRON_BUILDER_CACHE=%cd%\\.eb-cache&& set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/&& set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/&& electron-builder --win portable --x64",
+    "dist:dir": "electron-builder --win dir --x64",
+    "dist:zip": "set ELECTRON_BUILDER_CACHE=%cd%\\.eb-cache&& set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/&& set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/&& electron-builder --win zip --x64",
+    "release": "set ELECTRON_BUILDER_CACHE=%cd%\\.eb-cache&& set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/&& set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/&& electron-builder --win portable zip --x64 && powershell -NoProfile -ExecutionPolicy Bypass -Command \"Copy-Item -Force 'dist\\KMCL-Portable-*.exe' 'KMCL.exe'; Copy-Item -Force 'dist\\KMCL-*-win-x64.zip' '.'\""
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.kmcl.launcher",
+    "productName": "KMCL",
+    "copyright": "Copyright © 2026 KMCL",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "npmRebuild": false,
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "KMCL-${version}-win-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "KMCL-Portable-${version}.${ext}"
+    }
+  }
+}
